@@ -49,7 +49,6 @@ return (
         Ingresar
         </button>
 
-        {/* 🔥 BOTÓN NUEVO */}
         <button 
         onClick={() => navigate("/registro")} 
         style={styles.buttonSecondary}

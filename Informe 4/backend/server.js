@@ -43,3 +43,5 @@ app.post("/login", (req, res) => {
     }
   });
 });
+// antes de correr back y front
+//mysql -u root -p < proyecto_web.sql
