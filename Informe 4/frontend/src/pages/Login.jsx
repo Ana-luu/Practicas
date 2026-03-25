@@ -17,8 +17,13 @@ const iniciarSesion = async () => {
     body: JSON.stringify({ correo, password })
     });
 
-    const data = await res.text();
-    alert(data);
+    const data = await res.json();
+if (res.ok) {
+  localStorage.setItem("usuario", JSON.stringify(data.usuario));
+  navigate("/home");
+} else {
+  alert(data);
+}
 };
 
 return (
