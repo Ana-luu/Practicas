@@ -5,27 +5,32 @@ import facu from "../assets/FACU.jpg";
 function Login() {
 const navigate = useNavigate();
 
-const [correo, setCorreo] = useState("");
+const [registro, setRegistro] = useState("");
 const [password, setPassword] = useState("");
 
-const iniciarSesion = async () => {
+const iniciarSesion= async () => {
+  try {
     const res = await fetch("http://localhost:3000/login", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ correo, password })
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ registro, password }),
     });
 
-    const data = await res.json();
-if (res.ok) {
-  localStorage.setItem("usuario", JSON.stringify(data.usuario));
-  navigate("/home");
-} else {
-  alert(data);
-}
+    if (res.ok) {
+      const datosUsuario = await res.json(); // Aquí recibes el {id, nombres, apellidos...}
+      
+      // 1. Guardamos el objeto REAL en el localStorage
+      localStorage.setItem("usuario", JSON.stringify(datosUsuario));
+      
+      // 2. Redirigimos al Home (asegúrate que la ruta sea "/" o "/home" según tu App.jsx)
+      navigate("/home"); 
+    } else {
+      alert("Usuario o contraseña incorrectos");
+    }
+  } catch (error) {
+    console.error("Error en login:", error);
+  }
 };
-
 return (
     <div style={styles.container}>
     <div style={styles.card}>
@@ -35,10 +40,10 @@ return (
         <h2>FACULTAD DE INGENIERIA</h2>
 
         <input
-        type="email"
-        placeholder="Correo"
-        value={correo}
-        onChange={(e) => setCorreo(e.target.value)}
+        type="registro"
+        placeholder="Registro"
+        value={registro}
+        onChange={(e) => setRegistro(e.target.value)}
         style={styles.input}
         />
 

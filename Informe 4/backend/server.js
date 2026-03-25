@@ -22,14 +22,21 @@ app.post("/registro", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const { correo, password } = req.body;
-  const sql = "SELECT * FROM usuarios WHERE correo = ? AND password = ?";
-  db.query(sql, [correo, password], (err, result) => {
-    if (err) { res.status(500).send("Error en el servidor"); }
-    else if (result.length > 0) {
-      res.json({ mensaje: "Login correcto", usuario: result[0] });
+  const { registro, password } = req.body;
+  
+  // Seleccionamos los datos que necesitamos para el resto de la app
+  const sql = "SELECT id, nombres, apellidos, registro FROM usuarios WHERE registro = ? AND password = ?";
+
+  db.query(sql, [registro, password], (err, result) => {
+    if (err) {
+      res.status(500).send("Error en el servidor");
     } else {
-      res.status(401).send("Usuario o contraseña incorrectos");
+      if (result.length > 0) {
+        // EN LUGAR DE res.send("Login correcto"), mandamos el objeto:
+        res.json(result[0]); 
+      } else {
+        res.status(401).send("Usuario o contraseña incorrectos");
+      }
     }
   });
 });
@@ -95,7 +102,8 @@ app.post("/publicaciones", (req, res) => {
 
 app.get("/comentarios/:publicacion_id", (req, res) => {
   const sql = `
-    SELECT c.id, c.mensaje, c.fecha,
+    SELECT 
+      c.id, c.mensaje, c.fecha,
       CONCAT(u.nombres, ' ', u.apellidos) AS autor
     FROM comentarios c
     JOIN usuarios u ON c.usuario_id = u.id
@@ -107,13 +115,32 @@ app.get("/comentarios/:publicacion_id", (req, res) => {
     else res.json(result);
   });
 });
-
 app.post("/comentarios", (req, res) => {
   const { usuario_id, publicacion_id, mensaje } = req.body;
   const sql = "INSERT INTO comentarios (usuario_id, publicacion_id, mensaje) VALUES (?, ?, ?)";
   db.query(sql, [usuario_id, publicacion_id, mensaje], (err) => {
     if (err) { console.log(err); res.status(500).send("Error al comentar"); }
     else res.send("Comentario agregado");
+  });
+});
+
+app.post("/publicaciones-directas", (req, res) => {
+  const { usuario_id, mensaje, nombre_entidad, tipo_entidad } = req.body;
+  const tabla = tipo_entidad === "curso" ? "cursos" : "catedraticos";
+  
+  // 1. Insertar el nuevo curso o catedrático
+  db.query(`INSERT INTO ${tabla} (nombre) VALUES (?)`, [nombre_entidad], (err, result) => {
+    if (err) return res.status(500).send("Error al crear entidad");
+
+    const nuevoId = result.insertId;
+    const columnaId = tipo_entidad === "curso" ? "curso_id" : "catedratico_id";
+
+    // 2. Insertar la publicación usando el ID recién creado
+    const sqlPub = `INSERT INTO publicaciones (usuario_id, mensaje, ${columnaId}) VALUES (?, ?, ?)`;
+    db.query(sqlPub, [usuario_id, mensaje, nuevoId], (err2) => {
+      if (err2) return res.status(500).send("Error al crear publicación");
+      res.send("Publicación creada exitosamente");
+    });
   });
 });
 

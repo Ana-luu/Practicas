@@ -13,6 +13,77 @@ function Home() {
   const [comentarios, setComentarios] = useState({});
   const [nuevoComentario, setNuevoComentario] = useState({});
 
+  // 1. DEFINICIÓN DE FUNCIONES PRIMERO
+  const cargarComentarios = async (publicacion_id) => {
+    try {
+      const res = await fetch(`http://localhost:3000/comentarios/${publicacion_id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setComentarios((prev) => ({ ...prev, [publicacion_id]: data }));
+      }
+    } catch (error) {
+      console.error("Error al cargar comentarios:", error);
+    }
+  };
+
+  const cargarPublicaciones = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/publicaciones");
+      if (res.ok) {
+        const data = await res.json();
+        setPublicaciones(data);
+        
+        // Cargar comentarios usando for...of para evitar problemas de asincronía
+        for (const p of data) {
+          await cargarComentarios(p.id);
+        }
+      }
+    } catch (error) {
+      console.error("Error al cargar publicaciones:", error);
+    }
+  };
+
+  const agregarComentario = async (publicacion_id) => {
+    const mensaje = nuevoComentario[publicacion_id];
+    if (!mensaje || mensaje.trim() === "") return;
+
+    try {
+      const res = await fetch("http://localhost:3000/comentarios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuario_id: usuario.id, publicacion_id, mensaje }),
+      });
+
+      if (res.ok) {
+        setNuevoComentario((prev) => ({ ...prev, [publicacion_id]: "" }));
+        cargarComentarios(publicacion_id); // Recargar solo los comentarios de esta publicación
+      }
+    } catch (error) {
+      console.error("Error al enviar comentario:", error);
+    }
+  };
+
+  const buscarUsuario = async () => {
+    if (!busquedaUsuario.trim()) return;
+    try {
+      const res = await fetch(`http://localhost:3000/usuario/${busquedaUsuario}`);
+      if (res.ok) {
+        const data = await res.json();
+        alert(`Usuario encontrado: ${data.nombres} ${data.apellidos} (${data.correo})`);
+      } else {
+        alert("Usuario no encontrado");
+      }
+    } catch (error) {
+      console.error("Error al buscar usuario:", error);
+    }
+  };
+
+  const cerrarSesion = () => {
+    localStorage.removeItem("usuario");
+    navigate("/");
+  };
+
+  // 2. USE EFFECT DESPUÉS DE LAS FUNCIONES
   useEffect(() => {
     if (!usuario) {
       navigate("/");
@@ -21,44 +92,7 @@ function Home() {
     cargarPublicaciones();
   }, []);
 
-  const cargarPublicaciones = async () => {
-    const res = await fetch("http://localhost:3000/publicaciones");
-    const data = await res.json();
-    setPublicaciones(data);
-    data.forEach((p) => cargarComentarios(p.id));
-  };
-
-  const cargarComentarios = async (publicacion_id) => {
-    const res = await fetch(`http://localhost:3000/comentarios/${publicacion_id}`);
-    const data = await res.json();
-    setComentarios((prev) => ({ ...prev, [publicacion_id]: data }));
-  };
-
-  const agregarComentario = async (publicacion_id) => {
-    const mensaje = nuevoComentario[publicacion_id];
-    if (!mensaje || mensaje.trim() === "") return;
-
-    await fetch("http://localhost:3000/comentarios", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ usuario_id: usuario.id, publicacion_id, mensaje }),
-    });
-
-    setNuevoComentario((prev) => ({ ...prev, [publicacion_id]: "" }));
-    cargarComentarios(publicacion_id);
-  };
-
-  const buscarUsuario = async () => {
-    if (!busquedaUsuario.trim()) return;
-    const res = await fetch(`http://localhost:3000/usuario/${busquedaUsuario}`);
-    if (res.ok) {
-      const data = await res.json();
-      alert(`Usuario encontrado: ${data.nombres} ${data.apellidos} (${data.correo})`);
-    } else {
-      alert("Usuario no encontrado");
-    }
-  };
-
+  // 3. LÓGICA DE FILTRADO
   const publicacionesFiltradas = publicaciones.filter((p) => {
     if (filtro === "curso") {
       return p.curso_nombre && p.curso_nombre.toLowerCase().includes(busqueda.toLowerCase());
@@ -69,11 +103,7 @@ function Home() {
     return true;
   });
 
-  const cerrarSesion = () => {
-    localStorage.removeItem("usuario");
-    navigate("/");
-  };
-
+  // 4. RENDERIZADO (El JSX se mantiene igual a tu diseño original)
   return (
     <div style={styles.container}>
       {/* NAVBAR */}
@@ -83,7 +113,7 @@ function Home() {
           <span style={styles.navTitle}>Ingeniería USAC</span>
         </div>
         <div style={styles.navRight}>
-          <span style={styles.navUser}>Hola, {usuario?.nombres}</span>
+          <span style={styles.navUser}>Hola, {usuario?.registro}</span>
           <button onClick={() => navigate("/crear-publicacion")} style={styles.btnPublicar}>
             + Nueva publicación
           </button>
@@ -169,8 +199,6 @@ function Home() {
                 </div>
 
                 <p style={styles.cardMensaje}>{pub.mensaje}</p>
-
-                {/* COMENTARIOS */}
                 <div style={styles.comentariosSection}>
                   <p style={styles.comentariosTitle}>
                     💬 {comentarios[pub.id]?.length || 0} comentario(s)
