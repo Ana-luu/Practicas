@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import facu from "../assets/FACU.jpg";
+import Modal from "../Modal/Modal";
 
 function Home() {
   const navigate = useNavigate();
@@ -14,7 +15,6 @@ function Home() {
   const [nuevoComentario, setNuevoComentario] = useState({});
   const [modalMensaje, setModalMensaje] = useState("");
 
-  // 1. DEFINICIÓN DE FUNCIONES PRIMERO
   const cargarComentarios = async (publicacion_id) => {
     try {
       const res = await fetch(`http://localhost:3000/comentarios/${publicacion_id}`);
@@ -57,7 +57,7 @@ function Home() {
 
       if (res.ok) {
         setNuevoComentario((prev) => ({ ...prev, [publicacion_id]: "" }));
-        cargarComentarios(publicacion_id); // Recargar solo los comentarios de esta publicación
+        cargarComentarios(publicacion_id); 
       }
     } catch (error) {
       console.error("Error al enviar comentario:", error);
@@ -84,7 +84,6 @@ function Home() {
     navigate("/");
   };
 
-  // 2. USE EFFECT DESPUÉS DE LAS FUNCIONES
   useEffect(() => {
     if (!usuario) {
       navigate("/");
@@ -93,7 +92,7 @@ function Home() {
     cargarPublicaciones();
   }, []);
 
-  // 3. LÓGICA DE FILTRADO
+
   const publicacionesFiltradas = publicaciones.filter((p) => {
     if (filtro === "curso") {
       return p.curso_nombre && p.curso_nombre.toLowerCase().includes(busqueda.toLowerCase());
@@ -104,10 +103,9 @@ function Home() {
     return true;
   });
 
-  // 4. RENDERIZADO (El JSX se mantiene igual a tu diseño original)
+
   return (
     <div style={styles.container}>
-      {/* NAVBAR */}
       <div style={styles.navbar}>
         <div style={styles.navLeft}>
           <img src={facu} alt="facu" style={styles.navLogo} />
@@ -124,8 +122,13 @@ function Home() {
         </div>
       </div>
 
+      {modalMensaje && (
+  <Modal 
+    mensaje={modalMensaje} onClose={() => setModalMensaje("")}
+  />
+)}
+
       <div style={styles.body}>
-        {/* SIDEBAR FILTROS */}
         <div style={styles.sidebar}>
           <h3 style={styles.sidebarTitle}>Filtros</h3>
 
@@ -171,7 +174,6 @@ function Home() {
           </button>
         </div>
 
-        {/* FEED */}
         <div style={styles.feed}>
           <h2 style={styles.feedTitle}>Publicaciones recientes</h2>
 

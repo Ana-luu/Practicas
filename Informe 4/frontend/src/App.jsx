@@ -4,6 +4,7 @@ import Registro from "./pages/Registro";
 import Home from "./pages/Home";
 import CrearPublicacion from "./pages/CrearPublicacion";
 
+
 function App() {
   return (
     <Routes>
