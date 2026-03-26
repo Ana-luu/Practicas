@@ -10,6 +10,7 @@ function Registro() {
   const [apellidos, setApellidos] = useState("");
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
+  const [modalMensaje, setModalMensaje] = useState("");
 
   const registrar = async () => {
     try {
@@ -20,15 +21,15 @@ function Registro() {
       });
 
       if (res.ok) {
-        alert("¡Registro exitoso! Ahora inicia sesión.");
+        setModalMensaje("¡Registro exitoso! Ahora inicia sesión.");
         navigate("/");
       } else {
         const data = await res.text();
-        alert("Error: " + data);
+        setModalMensaje("Error: " + data);
       }
     } catch (error) {
       console.log(error);
-      alert("Error al registrar");
+      setModalMensaje("Error al registrar");
     }
   };
 
