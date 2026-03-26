@@ -7,6 +7,7 @@ const navigate = useNavigate();
 
 const [registro, setRegistro] = useState("");
 const [password, setPassword] = useState("");
+const [modalMensaje, setModalMensaje] = useState("");
 
 const iniciarSesion= async () => {
   try {
@@ -25,7 +26,7 @@ const iniciarSesion= async () => {
       // 2. Redirigimos al Home (asegúrate que la ruta sea "/" o "/home" según tu App.jsx)
       navigate("/home"); 
     } else {
-      alert("Usuario o contraseña incorrectos");
+      setModalMensaje("Usuario o contraseña incorrectos");
     }
   } catch (error) {
     console.error("Error en login:", error);

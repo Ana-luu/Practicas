@@ -12,6 +12,7 @@ function Home() {
   const [busquedaUsuario, setBusquedaUsuario] = useState("");
   const [comentarios, setComentarios] = useState({});
   const [nuevoComentario, setNuevoComentario] = useState({});
+  const [modalMensaje, setModalMensaje] = useState("");
 
   // 1. DEFINICIÓN DE FUNCIONES PRIMERO
   const cargarComentarios = async (publicacion_id) => {
@@ -69,9 +70,9 @@ function Home() {
       const res = await fetch(`http://localhost:3000/usuario/${busquedaUsuario}`);
       if (res.ok) {
         const data = await res.json();
-        alert(`Usuario encontrado: ${data.nombres} ${data.apellidos} (${data.correo})`);
+        setModalMensaje(`Usuario encontrado: ${data.nombres} ${data.apellidos} (${data.correo})`);
       } else {
-        alert("Usuario no encontrado");
+        setModalMensaje("Usuario no encontrado");
       }
     } catch (error) {
       console.error("Error al buscar usuario:", error);

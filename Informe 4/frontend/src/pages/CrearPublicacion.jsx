@@ -9,6 +9,7 @@ function CrearPublicacion() {
   const [tipo, setTipo] = useState("curso");
   const [nombreNuevo, setNombreNuevo] = useState(""); // Aquí guardamos el nombre que escribas
   const [mensaje, setMensaje] = useState("");
+  const [modalMensaje, setModalMensaje] = useState("");
 
   useEffect(() => {
     if (!usuario) { navigate("/"); return; }
@@ -17,7 +18,7 @@ function CrearPublicacion() {
   const publicar = async () => {
     // Validamos que los campos no estén vacíos
     if (!nombreNuevo.trim() || !mensaje.trim()) {
-      alert("Por favor completa todos los campos");
+      setModalMensaje("Por favor, completa todos los campos antes de publicar.");
       return;
     }
 
@@ -38,14 +39,14 @@ function CrearPublicacion() {
       });
 
       if (res.ok) {
-        alert("¡Publicación y " + tipo + " creados exitosamente!");
+        setModalMensaje("¡Publicación y " + tipo + " creados exitosamente!");
         navigate("/home");
       } else {
-        alert("Error al procesar la publicación");
+        setModalMensaje("Error al procesar la publicación");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("No se pudo conectar con el servidor");
+      setModalMensaje("No se pudo conectar con el servidor");
     }
   };
 
