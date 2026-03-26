@@ -87,14 +87,15 @@ card: {
     borderRadius: "15px",
     boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
     textAlign: "center",
-    width: "300px",
+    width: "350px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center"
 },
 image: {
-    width: "100px",
-    marginBottom: "10px"
+    width: "120px",
+    height: "auto",
+    marginBottom: "15px"
 },
 input: {
     display: "block",
